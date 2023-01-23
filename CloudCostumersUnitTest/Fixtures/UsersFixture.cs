@@ -9,8 +9,8 @@ namespace CloudCostumersUnitTest.Fixtures
 {
     static class UsersFixture
     {
-        public static List<Users> GetTestUsers() => new(){
-                new Users
+        public static List<User> GetTestUsers() => new(){
+                new User
                     {
                         Id = 1,
                         Name = "Test",
@@ -23,7 +23,7 @@ namespace CloudCostumersUnitTest.Fixtures
                         Email = "email@test.com"
 
                     },
-                new Users
+                new User
                     {
                         Id = 2,
                         Name = "Test 2",
@@ -36,7 +36,7 @@ namespace CloudCostumersUnitTest.Fixtures
                         Email = "email2@test.com"
 
                     },
-                new Users
+                new User
                     {
                         Id = 3,
                         Name = "Test 3",

@@ -5,13 +5,8 @@ using CloudCustomers.Services.Interfaces;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CloudCostumersUnitTest
+namespace CloudCostumersUnitTest.Controller
 {
     public class TestUsersController
     {
@@ -39,16 +34,17 @@ namespace CloudCostumersUnitTest
             var mockUserService = new Mock<IUsersService>();
             mockUserService
                 .Setup(service => service.GetAllUsers())
-                .ReturnsAsync(new List<Users>());
+                .ReturnsAsync(new List<User>());
 
             var sut = new UsersController(mockUserService.Object);
             //Act
             var result = await sut.Get();
 
+            //Assert
             mockUserService.Verify(
                 service => service.GetAllUsers(),
                 Times.Once()
-                ); 
+                );
         }
 
         [Fact]
@@ -61,16 +57,14 @@ namespace CloudCostumersUnitTest
                 .ReturnsAsync(UsersFixture.GetTestUsers());
 
             var sut = new UsersController(mockUserService.Object);
+
             //Act
-            
             var result = await sut.Get();
 
-
             //Assert
-
             result.Should().BeOfType<OkObjectResult>();
             var objectResult = (OkObjectResult)result;
-            objectResult.Value.Should().BeOfType<List<Users>>();    
+            objectResult.Value.Should().BeOfType<List<User>>();
 
 
         }
@@ -81,20 +75,18 @@ namespace CloudCostumersUnitTest
             var mockUserService = new Mock<IUsersService>();
             mockUserService
                 .Setup(service => service.GetAllUsers())
-                .ReturnsAsync(new List<Users>());
+                .ReturnsAsync(new List<User>());
 
             var sut = new UsersController(mockUserService.Object);
-            //Act
 
+            //Act
             var result = await sut.Get();
 
-
             //Assert
-
             result.Should().BeOfType<NotFoundResult>();
             var objectResult = (NotFoundResult)result;
             objectResult.StatusCode.Should().Be(404);
-            
+
         }
     }
 }
