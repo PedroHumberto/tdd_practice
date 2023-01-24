@@ -1,8 +1,10 @@
 ﻿using CloudCostumersUnitTest.Fixtures;
 using CloudCostumersUnitTest.Helpers;
+using CloudCustomers.Config;
 using CloudCustomers.Models;
 using CloudCustomers.Services;
 using FluentAssertions;
+using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel.Utilities;
 using Moq;
 using Moq.Protected;
@@ -22,9 +24,16 @@ namespace CloudCostumersUnitTest.Services
         {
             //Arrange
             var expectedResponse = UsersFixture.GetTestUsers();
+            var endpoint = "https://exemple.com";
             var handlerMock = MockHttpMessageHandler<User>.SetupBasicGetResourceList(expectedResponse);
             var httpClient = new HttpClient(handlerMock.Object);
-            var sut = new UsersService(httpClient);
+
+            var config = Options.Create(new UsersApiOptions
+            {
+                Endpoint = endpoint
+            });
+
+            var sut = new UsersService(httpClient, config);
 
             //Act
             await sut.GetAllUsers();
@@ -43,9 +52,16 @@ namespace CloudCostumersUnitTest.Services
         {
             //Arrange
             var expectedResponse = UsersFixture.GetTestUsers();
+            var endpoint = "https://exemple.com";
             var handlerMock = MockHttpMessageHandler<User>.SetupReturn404(expectedResponse);
             var httpClient = new HttpClient(handlerMock.Object);
-            var sut = new UsersService(httpClient);
+
+            var config = Options.Create(new UsersApiOptions
+            {
+                Endpoint = endpoint
+            });
+
+            var sut = new UsersService(httpClient, config);
 
             //Act
             var result = await sut.GetAllUsers();
@@ -61,9 +77,16 @@ namespace CloudCostumersUnitTest.Services
         {
             //Arrange
             var expectedResponse = UsersFixture.GetTestUsers();
+            var endpoint = "https://exemple.com";
             var handlerMock = MockHttpMessageHandler<User>.SetupBasicGetResourceList(expectedResponse);
             var httpClient = new HttpClient(handlerMock.Object);
-            var sut = new UsersService(httpClient);
+
+            var config = Options.Create(new UsersApiOptions
+            {
+                Endpoint = endpoint
+            });
+
+            var sut = new UsersService(httpClient, config);
 
             //Act
             var result = await sut.GetAllUsers();
@@ -71,7 +94,33 @@ namespace CloudCostumersUnitTest.Services
             //Assert
             result.Count.Should().Be(expectedResponse.Count);
 
+        }
+        [Fact]
+        public async Task GetAllUsers_WhenCalled_InvokesConfiguredExternalUrl()
+        {
+            //Arrange
+            var expectedResponse = UsersFixture.GetTestUsers();
+            var endpoint = "https://exemple.com/users";
+            var handlerMock = MockHttpMessageHandler<User>.SetupBasicGetResourceList(expectedResponse, endpoint);
+            var httpClient = new HttpClient(handlerMock.Object);
+            var config = Options.Create(new UsersApiOptions
+            {
+                Endpoint = endpoint
+            });
+            var sut = new UsersService(httpClient, config);
 
+            //Act
+            var result = await sut.GetAllUsers();
+
+            var uri = new Uri(endpoint);
+
+            //Assert
+            handlerMock.Protected().Verify(
+                "SendAsync",
+                Times.Exactly(1),
+                ItExpr.Is<HttpRequestMessage>(req => req.Method == HttpMethod.Get && req.RequestUri == uri),
+                ItExpr.IsAny<CancellationToken>()
+                );
 
         }
 
